@@ -7,7 +7,13 @@
 	<script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.6.0/ol-debug.js"></script>
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.6.0/ol.css">
 	<style type='text/css'>
-		
+.selectControl {
+  top: 5em;
+  left: .5em;
+}
+.ol-touch .selectControl {
+  top: 80px;
+}
 	</style>
 	
 
@@ -15,7 +21,7 @@
 <body>
 	<div class="row-fluid">
 		<div class="span12">
-			<div id="map" class="map" style="width:800px; height:600px;"></div>
+			<div id="map" class="map" style="width:800px; height:400px;"></div>
 		</div>
 	</div>
 
@@ -35,6 +41,10 @@
 			</select>
 		</div>
 	</form>
+
+	<div style="display:none;">
+
+	</div>
 
 <script type='text/javascript'>//<![CDATA[ 
 
@@ -150,9 +160,8 @@ var Draw = {
 	getActive: function() {
 		return this.activeType ? this[this.activeType].getActive() : false;
 	},
-	setActive: function(active) {
-		var type = optionsForm.elements['draw-type'].value;
-		if (active) {
+	setActive: function(type) {
+		if (type) {
 			this.activeType && this[this.activeType].setActive(false);
 			this[type].setActive(true);
 			this.activeType = type;
@@ -187,7 +196,7 @@ optionsForm.onchange = function(e) {
 	}
 };
 
-Draw.setActive(true);
+Draw.setActive(false);
 Modify.setActive(false);
 
 // The snap interaction must be added after the Modify and Draw interactions
@@ -197,6 +206,52 @@ var snap = new ol.interaction.Snap({
 	source: vector.getSource()
 });
 map.addInteraction(snap);
+
+
+function createButton(imgPath, handler) {
+	var button = document.createElement('button');
+	var iconImg = document.createElement('img');
+	iconImg.src = imgPath;
+	iconImg.width = '16';
+	iconImg.height = '16';
+	button.appendChild(iconImg);
+	button.addEventListener('click', handler, false);
+	button.addEventListener('touchstart', handler, false);
+	return button;
+}
+
+function SumetriControl(opt_options) {
+
+	var options = opt_options || {};
+	var this_ = this;
+
+
+	var editButton = createButton('img/edit-icon.png', function(e) {
+		Draw.setActive(false);
+		Modify.setActive(true);
+	});
+
+	var polygonButton = createButton('img/polygon-icon.gif', function(e) {
+		Draw.setActive('Polygon');
+		Modify.setActive(false);
+	});
+
+	var element = document.createElement('div');
+	element.className = 'selectControl ol-unselectable ol-control';
+	element.appendChild(editButton);
+	element.appendChild(polygonButton);
+
+	ol.control.Control.call(this, {
+		element: element,
+		target: options.target
+	});
+
+};
+ol.inherits(SumetriControl, ol.control.Control);
+
+map.addControl(new SumetriControl());
+
+
 
 //});//]]>	
 
