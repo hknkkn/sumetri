@@ -231,6 +231,11 @@ function SumetriControl(opt_options) {
 		Modify.setActive(true);
 	});
 
+	var linesButton = createButton('img/lines-icon.gif', function(e) {
+		Draw.setActive('LineString');
+		Modify.setActive(false);
+	});
+
 	var polygonButton = createButton('img/polygon-icon.gif', function(e) {
 		Draw.setActive('Polygon');
 		Modify.setActive(false);
@@ -239,6 +244,7 @@ function SumetriControl(opt_options) {
 	var element = document.createElement('div');
 	element.className = 'selectControl ol-unselectable ol-control';
 	element.appendChild(editButton);
+	element.appendChild(linesButton);
 	element.appendChild(polygonButton);
 
 	ol.control.Control.call(this, {
