@@ -25,27 +25,6 @@
 		</div>
 	</div>
 
-	<form id="options-form" automplete="off">
-		<div class="radio">
-			<label><input type="radio" name="interaction" value="draw" id="draw" checked=""/>Ciz &nbsp;</label>
-		</div>
-		<div class="radio">
-			<label><input type="radio" name="interaction" value="modify"/>Duzenele&nbsp;</label>
-		</div>
-		<div class="form-group">
-			<label>Cizim turu&nbsp;</label>
-			<select name="draw-type" id="draw-type">
-				<option value="Point">Nokta</option>
-				<option value="LineString">Cizgi</option>
-				<option value="Polygon">Kosegen</option>
-			</select>
-		</div>
-	</form>
-
-	<div style="display:none;">
-
-	</div>
-
 <script type='text/javascript'>//<![CDATA[ 
 
 //http://openlayers.org/en/v3.3.0/examples/vector-labels.html
@@ -124,7 +103,7 @@ var alanStyleFunction = function(resolution) {
 			font: "Monospace",
 			scale: 2,
 			fill: new ol.style.Fill({
-				color: 'rgba(255, 128, 128, 0.9)'
+				color: 'rgba(50, 50, 50, 0.9)'
 			}),
 			stroke: new ol.style.Stroke({
 				color: '#ffffff',
@@ -245,12 +224,18 @@ function SumetriControl(opt_options) {
 		Modify.setActive(false);
 	});
 
+	var sprinklerButton = createButton('img/sprinkler.png', function(e) {
+		Draw.setActive('Point', 'img/sprinkler-drop.png');
+		Modify.setActive(false);
+	});
+
 	var element = document.createElement('div');
 	element.className = 'selectControl ol-unselectable ol-control';
 	element.appendChild(editButton);
 	element.appendChild(linesButton);
 	element.appendChild(polygonButton);
 	element.appendChild(valveButton);
+	element.appendChild(sprinklerButton);
 
 	ol.control.Control.call(this, {
 		element: element,
