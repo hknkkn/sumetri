@@ -115,9 +115,42 @@ var Modify = {
 };
 Modify.init();
 
+var alanStyleFunction = function(resolution) {
+	var style = new ol.style.Style({
+		fill: vector.getStyle().getFill(),
+		stroke: vector.getStyle().getStroke(),
+		image: vector.getStyle().getImage(),
+		text: new ol.style.Text({
+			font: "Monospace",
+			scale: 2,
+			fill: new ol.style.Fill({
+				color: 'rgba(255, 128, 128, 0.9)'
+			}),
+			stroke: new ol.style.Stroke({
+				color: '#ffffff',
+				width: 1
+			}),
+			text: resolution < 45 ? this.get('alanAdi') : ''
+		})
+	});
+	return [style];
+};
+
+var noktaStyleFunction = function(resolution) {
+	var style = new ol.style.Style({
+		image: resolution > 45 ? null : new ol.style.Icon({
+			anchor: [0.5, 1],
+		    opacity: 0.75,
+		    scale: 0.6,
+		    src: this.get('pointIconSrc')
+		})
+	});
+	return [style];
+};
 
 var Draw = {
 	init: function() {
+		var that = this;
 		map.addInteraction(this.Point);
 		this.Point.setActive(false);
 		map.addInteraction(this.LineString);
@@ -125,24 +158,12 @@ var Draw = {
 		map.addInteraction(this.Polygon);
 		this.Polygon.setActive(false);
 		this.Polygon.on('drawend', function(e) {
-			e.feature.setStyle(new ol.style.Style({
-				fill: vector.getStyle().getFill(),
-				stroke: vector.getStyle().getStroke(),
-				image: vector.getStyle().getImage(),
-				text: new ol.style.Text({
-					font: "Monospace",
-					scale: 2,
-					fill: new ol.style.Fill({
-						color: 'rgba(255, 128, 128, 0.9)'
-					}),
-					stroke: new ol.style.Stroke({
-						color: '#ffffff',
-						width: 1
-					}),
-					text: window.prompt("Alan adi")
-				})
-			}));
-			return e.feature;
+			e.feature.set('alanAdi', window.prompt("Alan adi"));
+			e.feature.setStyle(alanStyleFunction);
+		});
+		this.Point.on('drawend', function(e) {
+			e.feature.set('pointIconSrc', that.pointIconSrc);
+			e.feature.setStyle(noktaStyleFunction);
 		});
 	},
 	Point: new ol.interaction.Draw({
@@ -160,11 +181,12 @@ var Draw = {
 	getActive: function() {
 		return this.activeType ? this[this.activeType].getActive() : false;
 	},
-	setActive: function(type) {
+	setActive: function(type, pointIconSrc) {
 		if (type) {
 			this.activeType && this[this.activeType].setActive(false);
 			this[type].setActive(true);
 			this.activeType = type;
+			this.pointIconSrc = pointIconSrc;
 		} else {
 			this.activeType && this[this.activeType].setActive(false);
 			this.activeType = null;
@@ -172,29 +194,6 @@ var Draw = {
 	}
 };
 Draw.init();
-
-var optionsForm = document.getElementById('options-form');
-
-
-/**
- * Let user change the geometry type.
- * @param {Event} e Change event.
- */
-optionsForm.onchange = function(e) {
-	var type = e.target.getAttribute('name');
-	var value = e.target.value;
-	if (type == 'draw-type') {
-		Draw.getActive() && Draw.setActive(true);
-	} else if (type == 'interaction') {
-		if (value == 'modify') {
-			Draw.setActive(false);
-			Modify.setActive(true);
-		} else if (value == 'draw') {
-			Draw.setActive(true);
-			Modify.setActive(false);
-		}
-	}
-};
 
 Draw.setActive(false);
 Modify.setActive(false);
@@ -241,11 +240,17 @@ function SumetriControl(opt_options) {
 		Modify.setActive(false);
 	});
 
+	var valveButton = createButton('img/valve.png', function(e) {
+		Draw.setActive('Point', 'img/valve-drop.png');
+		Modify.setActive(false);
+	});
+
 	var element = document.createElement('div');
 	element.className = 'selectControl ol-unselectable ol-control';
 	element.appendChild(editButton);
 	element.appendChild(linesButton);
 	element.appendChild(polygonButton);
+	element.appendChild(valveButton);
 
 	ol.control.Control.call(this, {
 		element: element,
